@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import {
   Sparkles,
   Copy,
@@ -18,6 +18,7 @@ import {
   Loader2,
   ArrowRight,
   Sun,
+  Moon,
   CircleUserRound,
 } from "lucide-react";
 import { PERSONAS } from "@/lib/personas";
@@ -91,6 +92,35 @@ export default function Home() {
   const [error, setError] = useState(null);
   const [copied, setCopied] = useState(false);
 
+  // Dark mode is the default because it matches the To-Be design.
+  const [darkMode, setDarkMode] = useState(true);
+
+  // Restore saved theme preference.
+  useEffect(() => {
+    const savedTheme = localStorage.getItem("promptify-theme");
+
+    if (savedTheme === "light") {
+      setDarkMode(false);
+    }
+  }, []);
+
+  // Apply theme to the page.
+  useEffect(() => {
+    document.documentElement.classList.toggle(
+      "light-theme",
+      !darkMode
+    );
+
+    localStorage.setItem(
+      "promptify-theme",
+      darkMode ? "dark" : "light"
+    );
+  }, [darkMode]);
+
+  const toggleTheme = () => {
+    setDarkMode((current) => !current);
+  };
+
   const runImprovise = useCallback(async () => {
     if (!input.trim() || loading) return;
 
@@ -158,6 +188,22 @@ export default function Home() {
   const runExample = (example) => {
     setMode(example.mode);
     setInput(example.text);
+    setSections(null);
+    setError(null);
+  };
+
+  /*
+   * Changing the persona clears the previous raw thought.
+   * This gives every mode a fresh input box.
+   */
+  const handleModeChange = (newMode) => {
+    if (newMode === mode) return;
+
+    setMode(newMode);
+    setInput("");
+    setSections(null);
+    setError(null);
+    setCopied(false);
   };
 
   return (
@@ -200,12 +246,27 @@ export default function Home() {
               <span>Powered by Groq</span>
             </div>
 
+            {/* Theme Toggle */}
             <button
               type="button"
               className="theme-button"
-              aria-label="Toggle theme"
+              aria-label={
+                darkMode
+                  ? "Switch to light mode"
+                  : "Switch to dark mode"
+              }
+              title={
+                darkMode
+                  ? "Switch to light mode"
+                  : "Switch to dark mode"
+              }
+              onClick={toggleTheme}
             >
-              <Sun size={19} />
+              {darkMode ? (
+                <Sun size={19} />
+              ) : (
+                <Moon size={19} />
+              )}
             </button>
           </div>
         </div>
@@ -219,12 +280,14 @@ export default function Home() {
         <section className="hero-section">
           <h2>
             Transform Your Thoughts Into{" "}
-            <span className="gradient-text">Powerful Prompts</span>
+            <span className="gradient-text">
+              Powerful Prompts
+            </span>
           </h2>
 
           <p>
-            Select a persona, add your raw thoughts, and let Promptify craft
-            the perfect AI prompt for you.
+            Select a persona, add your raw thoughts, and let
+            Promptify craft the perfect AI prompt for you.
           </p>
 
           <div className="gradient-bar" />
@@ -247,12 +310,16 @@ export default function Home() {
                 <button
                   key={persona.id}
                   type="button"
-                  onClick={() => setMode(persona.id)}
+                  onClick={() => handleModeChange(persona.id)}
                   data-active={active}
                   className="persona-button"
                 >
                   <span className="persona-icon">
-                    {Icon ? <Icon size={20} /> : <CircleUserRound size={20} />}
+                    {Icon ? (
+                      <Icon size={20} />
+                    ) : (
+                      <CircleUserRound size={20} />
+                    )}
                   </span>
 
                   <span className="persona-label">
@@ -302,6 +369,7 @@ export default function Home() {
               <div className="input-footer">
                 <span className="input-tip">
                   <span className="tip-bulb">♧</span>
+
                   Tip: Press{" "}
                   <kbd>Ctrl</kbd>
                   <span>+</span>
@@ -323,7 +391,10 @@ export default function Home() {
             >
               {loading ? (
                 <>
-                  <Loader2 size={19} className="animate-spin" />
+                  <Loader2
+                    size={19}
+                    className="animate-spin"
+                  />
                   <span>Improvising...</span>
                 </>
               ) : (
@@ -376,8 +447,8 @@ export default function Home() {
                   <h3>Your Optimized Prompt</h3>
 
                   <p>
-                    A structured, detailed, and role-specific prompt ready
-                    for AI.
+                    A structured, detailed, and role-specific prompt
+                    ready for AI.
                   </p>
                 </div>
               </div>
@@ -416,7 +487,8 @@ export default function Home() {
                   </div>
 
                   <p>
-                    Your structured prompt will appear here once you hit
+                    Your structured prompt will appear here once you
+                    hit
                     <strong> Improvise Prompt</strong>.
                   </p>
                 </div>
@@ -446,11 +518,13 @@ export default function Home() {
 
                       {section.type === "list" ? (
                         <ul className="output-list">
-                          {section.content.map((item, itemIndex) => (
-                            <li key={itemIndex}>
-                              {item}
-                            </li>
-                          ))}
+                          {section.content.map(
+                            (item, itemIndex) => (
+                              <li key={itemIndex}>
+                                {item}
+                              </li>
+                            )
+                          )}
                         </ul>
                       ) : (
                         <p className="output-paragraph">
@@ -478,7 +552,7 @@ export default function Home() {
                 className="stat-item"
               >
                 <div className="stat-icon">
-                  <StatIcon size={18} />
+                  <StatIcon size={20} />
                 </div>
 
                 <div>

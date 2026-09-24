@@ -1,7 +1,12 @@
-import { Inter } from "next/font/google";
+import { Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 
-const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
+import backgroundImage from "../Promptify-backgroundImage.png";
+
+const jakarta = Plus_Jakarta_Sans({
+  subsets: ["latin"],
+  variable: "--font-jakarta",
+});
 
 export const metadata = {
   title: "Promptify — Better Prompts. Better Results.",
@@ -11,8 +16,14 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en" className={inter.variable}>
-      <body>{children}</body>
+    <html lang="en" className={jakarta.variable}>
+      <body
+        style={{
+          "--promptify-background": `url(${backgroundImage.src})`,
+        }}
+      >
+        {children}
+      </body>
     </html>
   );
 }
